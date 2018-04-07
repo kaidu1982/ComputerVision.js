@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Processing</title>
+</head>
+<body>
+<div>
+<input type="file" id="selectedImage" accept="image/jpg, image/jpeg, image/png" />
+</div>
+<canvas id="originalCanvas" width="1000" height="1000"> </canvas>
+<canvas id="blurCanvas" width="1000" height="1000"> </canvas>
+<canvas id="grayscaleCanvas" width="1000" height="1000"> </canvas>
+</body>
+</html>
+<script src="../ComputerVision.js"></script>
+<script>
+    var input = document.querySelector('input');
+    input.addEventListener('change', updateImageDisplay);
+
+    function updateImageDisplay() {
+        var curFiles = input.files;
+        var url = window.URL.createObjectURL(curFiles[0]);
+
+        var originalCtx = document.getElementById('originalCanvas').getContext('2d');
+        var blurCtx = document.getElementById('blurCanvas').getContext('2d');
+        var grayCtx = document.getElementById('grayscaleCanvas').getContext('2d');
+
+        var img = new Image();
+
+
+        //TODO 워커로 작업을 분리하자. 워커에서 createElement 가 가능한가? 확인해보자.
+
+        img.onload = function() {
+            originalCtx.canvas.width = img.width;
+            originalCtx.canvas.height = img.height;
+            originalCtx.drawImage(img, 0, 0);
+
+            var imageData = originalCtx.getImageData(0, 0, img.width, img.height);
+            var originalPixels = new Uint8ClampedArray(imageData.data);
+
+
+            console.time("time for gray");
+            var grayPixels = CV.Image.GrayScale.toRGBA(originalPixels ,img.width, img.height);
+            console.timeEnd("time for gray");
+
+            grayCtx.canvas.width = img.width;
+            grayCtx.canvas.height = img.height;
+            imageData.data.set(grayPixels);
+            grayCtx.putImageData(imageData, 0, 0);
+
+            var blurWidth = 7, sigma = 1.5;
+
+            console.time("time for blur");
+            var blurPixels = CV.Image.Blur.toGaussianBlurImage(originalPixels, img.width, img.height, blurWidth, sigma);
+            console.timeEnd("time for blur");
+
+            blurCtx.canvas.width = img.width;
+            blurCtx.canvas.height = img.height;
+            imageData.data.set(blurPixels);
+            blurCtx.putImageData(imageData, 0, 0);
+        }
+        img.src = url;
+
+    }
+
+</script>

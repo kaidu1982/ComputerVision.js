@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ComputerVision.js</title>
+</head>
+<body>
+<video id="webcam" width="640" height="480"></video>
+<canvas id="canvas" width="640" height="480"></canvas>
+</body>
+</html>
+<script src="../ComputerVision.js"></script>
+<script>
+    var video = document.querySelector('video');
+    var canvas = window.canvas = document.querySelector('canvas');
+    var ctx = canvas.getContext("2d");
+
+    var constraints = {
+        audio: false,
+        video: true
+    };
+
+    /*
+    function handleSuccess(stream) {
+        window.stream = stream;
+        video.srcObject = stream;
+    }
+
+    function handleError(error) {
+        console.log('navigator.getUserMedia error: ', error);
+    }
+
+    navigator.mediaDevices.getUserMedia(constraints).
+        then(handleSuccess).
+        catch(handleError);
+    */
+    video.addEventListener('loadeddata', readyListener);
+
+    function readyListener() {
+        window.requestAnimationFrame(tick);
+    }
+
+    function tick() {
+        window.requestAnimationFrame(tick);
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            ctx.drawImage(video, 0, 0, 640, 480);
+            var imageData = ctx.getImageData(0, 0, 640, 480);
+
+            var blurWidth = 5, sigma = 1.5;
+            console.time("time for blur");
+            var blurPixels = CV.Image.Blur.toGaussianBlurImage(imageData.data, 640, 480, blurWidth, sigma);
+            console.timeEnd("time for blur");
+            imageData.data.set(blurPixels);
+            ctx.putImageData(imageData, 0, 0);
+        }
+    }
+
+    navigator.mediaDevices.getUserMedia(constraints).
+        then(function(stream) {
+                try {
+                    video.src = window.URL.createObjectURL(stream);
+                } catch (error) {
+                    video.src = stream;
+                }
+                setTimeout(function () {
+                    video.play();
+                }, 500);
+            }
+        ).catch(function(error){
+            console.log('navigator.getUserMedia error: ', error);
+        });
+
+
+</script>
