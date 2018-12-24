@@ -3,13 +3,15 @@
   "version": "0.0.1",
   "description": "",
   "main": "main.js",
+  "scripts": {
+    "dist": "webpack --env=production"
+  },
   "devDependencies": {
-    "webpack": "^4.4.1",
-    "webpack-cli": "^2.0.13",
-    "copy-webpack-plugin": "^4.5.1"
+    "webpack": "^4.28.2",
+    "webpack-cli": "^3.1.2",
+    "copy-webpack-plugin": "^4.6.0"
   },
   "dependencies": {
-    "numjs": "^0.15.1",
     "mathjs": "^4.0.0"
   }
 }
